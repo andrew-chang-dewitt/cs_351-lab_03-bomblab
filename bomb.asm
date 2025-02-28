@@ -551,26 +551,47 @@ Disassembly of section .text:
   4010e8:	48 83 ec 18          	sub    $0x18,%rsp
   4010ec:	48 8d 4c 24 08       	lea    0x8(%rsp),%rcx
   4010f1:	48 8d 54 24 0c       	lea    0xc(%rsp),%rdx
+  # also read 2 digits w/ scanf
   4010f6:	be e9 24 40 00       	mov    $0x4024e9,%esi
   4010fb:	b8 00 00 00 00       	mov    $0x0,%eax
   401100:	e8 c3 f9 ff ff       	callq  400ac8 <__isoc99_sscanf@plt>
+  # set a b here
+  # this compares num digits read to 2
   401105:	83 f8 02             	cmp    $0x2,%eax
+  # and jumps to explode if it's not also 2
   401108:	75 0d                	jne    401117 <phase_4+0x2f>
+  # load first input value into return arg
   40110a:	8b 44 24 0c          	mov    0xc(%rsp),%eax
+  #  then && with itself
   40110e:	85 c0                	test   %eax,%eax
+  # which sets the sign flag to 1 if eax is negative
+  # then we jump to explode if it was negative
+  # so far we know...
+  # |I| == 2
+  # I[0] >= 0
   401110:	78 05                	js     401117 <phase_4+0x2f>
+  # now ensure I[0] < 14
   401112:	83 f8 0e             	cmp    $0xe,%eax
+  # if not, boom
   401115:	7e 05                	jle    40111c <phase_4+0x34>
   401117:	e8 e3 02 00 00       	callq  4013ff <explode_bomb>
+  # otherwise
+  # edx := 14
   40111c:	ba 0e 00 00 00       	mov    $0xe,%edx
+  # esi := 0
   401121:	be 00 00 00 00       	mov    $0x0,%esi
+  # edi := I[0]
   401126:	8b 7c 24 0c          	mov    0xc(%rsp),%edi
   40112a:	e8 41 fd ff ff       	callq  400e70 <func4>
+  # expect result of func4 to be 1
   40112f:	83 f8 01             	cmp    $0x1,%eax
   401132:	75 07                	jne    40113b <phase_4+0x53>
+  # expect I[1] == 1
   401134:	83 7c 24 08 01       	cmpl   $0x1,0x8(%rsp)
+  # boom if not
   401139:	74 05                	je     401140 <phase_4+0x58>
   40113b:	e8 bf 02 00 00       	callq  4013ff <explode_bomb>
+  # otherwise pass phase
   401140:	48 83 c4 18          	add    $0x18,%rsp
   401144:	c3                   	retq   
 
