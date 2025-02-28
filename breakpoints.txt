@@ -1,0 +1,16 @@
+# 1 0x00000000004011fa <phase_1>
+# break phase_1
+# 2 0x0000000000401036 <phase_2>
+break phase_2
+# 3 0x0000000000401145 <phase_3>
+break phase_3
+# 4 0x00000000004010e8 <phase_4>
+break phase_4
+# 5 0x000000000040107a <phase_5>
+break phase_5
+# 6 0x0000000000400f3b <phase_6>
+break phase_6
+# 7 0x0000000000400eeb <secret_phase>
+break secret_phase
+# 8 0x00000000004013ff <explode_bomb>
+break explode_bomb
