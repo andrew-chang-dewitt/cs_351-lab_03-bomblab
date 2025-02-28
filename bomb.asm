@@ -324,11 +324,17 @@ Disassembly of section .text:
 
 0000000000400e70 <func4>:
   400e70:	48 83 ec 08          	sub    $0x8,%rsp
+  # ret := edx - esi
   400e74:	89 d0                	mov    %edx,%eax
   400e76:	29 f0                	sub    %esi,%eax
+  # ecx := value of ret
   400e78:	89 c1                	mov    %eax,%ecx
+  # shr -> shift right logical by src
+  # ecx := ecx >> 31, becomes msb preceded by all 0s
   400e7a:	c1 e9 1f             	shr    $0x1f,%ecx
   400e7d:	8d 04 01             	lea    (%rcx,%rax,1),%eax
+  # sar -> shift right arithmetic by src
+  # but what if there's only 1 arg given?
   400e80:	d1 f8                	sar    %eax
   400e82:	8d 0c 30             	lea    (%rax,%rsi,1),%ecx
   400e85:	39 f9                	cmp    %edi,%ecx
