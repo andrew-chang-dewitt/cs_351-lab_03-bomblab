@@ -471,43 +471,22 @@ Disassembly of section .text:
 0000000000401036 <phase_2>:
   401036:	55                   	push   %rbp
   401037:	53                   	push   %rbx
-  # make room for a 6 item array  of ints & 1 more int on stack (6 * 4) + 4 = 28
   401038:	48 83 ec 28          	sub    $0x28,%rsp
   40103c:	48 89 e6             	mov    %rsp,%rsi
-  # read 6 items & the length? from rdi (user input str) into array at $rsp
   40103f:	e8 f1 03 00 00       	callq  401435 <read_six_numbers>
-  # check that length is right by subtracting 0 from stack pointer
   401044:	83 3c 24 00          	cmpl   $0x0,(%rsp)
-  # if result was negative, then length of input array was wrong
   401048:	79 05                	jns    40104f <phase_2+0x19>
-  # and bomb should explode
   40104a:	e8 b0 03 00 00       	callq  4013ff <explode_bomb>
-  # otherwise continue
-  # create array index, i, starting at A[1]
-  # int i = 1
   40104f:	48 8d 5c 24 04       	lea    0x4(%rsp),%rbx
-  # int j = 1
   401054:	bd 01 00 00 00       	mov    $0x1,%ebp
-  # copies 1 to eax (return value)
-  # int k = j
   401059:	89 e8                	mov    %ebp,%eax
-  # adds value @ mem addr rbx - 4 to value at reg eax
-  # k += A[i - 1]
   40105b:	03 43 fc             	add    -0x4(%rbx),%eax
-  # cond = k == A[i]
   40105e:	39 03                	cmp    %eax,(%rbx)
-  # if not cond
   401060:	74 05                	je     401067 <phase_2+0x31>
-  # then boom
   401062:	e8 98 03 00 00       	callq  4013ff <explode_bomb>
-  # otherwise continue
-  # j++
   401067:	83 c5 01             	add    $0x1,%ebp
-  # i++
   40106a:	48 83 c3 04          	add    $0x4,%rbx
-  # if j is 6, end loop
   40106e:	83 fd 06             	cmp    $0x6,%ebp
-  # otherwise iterate again from 0x401059
   401071:	75 e6                	jne    401059 <phase_2+0x23>
   401073:	48 83 c4 28          	add    $0x28,%rsp
   401077:	5b                   	pop    %rbx
@@ -575,23 +554,17 @@ Disassembly of section .text:
   401144:	c3                   	retq   
 
 0000000000401145 <phase_3>:
-  # make room for 18 bytes on stack
   401145:	48 83 ec 18          	sub    $0x18,%rsp
   401149:	48 8d 4c 24 08       	lea    0x8(%rsp),%rcx
   40114e:	48 8d 54 24 0c       	lea    0xc(%rsp),%rdx
-  # format string for scanf
-  # str = "%d %d"
   401153:	be e9 24 40 00       	mov    $0x4024e9,%esi
-  # ensure result reg is 0
   401158:	b8 00 00 00 00       	mov    $0x0,%eax
   40115d:	e8 66 f9 ff ff       	callq  400ac8 <__isoc99_sscanf@plt>
   401162:	83 f8 01             	cmp    $0x1,%eax
   401165:	7f 05                	jg     40116c <phase_3+0x27>
   401167:	e8 93 02 00 00       	callq  4013ff <explode_bomb>
-  # boom if %rsp + 12 is > 7
   40116c:	83 7c 24 0c 07       	cmpl   $0x7,0xc(%rsp)
   401171:	77 66                	ja     4011d9 <phase_3+0x94>
-  # otherwise continue
   401173:	8b 44 24 0c          	mov    0xc(%rsp),%eax
   401177:	ff 24 c5 00 24 40 00 	jmpq   *0x402400(,%rax,8)
   40117e:	b8 00 00 00 00       	mov    $0x0,%eax
@@ -801,7 +774,6 @@ Disassembly of section .text:
   401430:	e8 a3 f6 ff ff       	callq  400ad8 <exit@plt>
 
 0000000000401435 <read_six_numbers>:
-  # sets up current frame
   401435:	48 83 ec 18          	sub    $0x18,%rsp
   401439:	48 89 f2             	mov    %rsi,%rdx
   40143c:	48 8d 4e 04          	lea    0x4(%rsi),%rcx
