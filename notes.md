@@ -199,22 +199,22 @@ assuming we pass that test, then we go straight into another comparison (also se
 as cmpl is somewhat hard to find documentation on, some searching around found the following on a lecture slide from princeton's spring 2016 offering of cos217 ([slide 61][1]):
 
 > Example: subl src, dest
->  • Compute sum (dest+(-src))
->  • Assign sum to dest
->  • ZF: set to 1 iff sum == 0
->  • SF: set to 1 iff sum < 0
->  • CF: set to 1 iff unsigned overflow
->    • Set to 1 iff dest<src
->  • OF: set to 1 iff signed overflow
->    • Set to 1 iff
+>  - Compute sum (dest+(-src))
+>  - Assign sum to dest
+>  - ZF: set to 1 iff sum == 0
+>  - SF: set to 1 iff sum < 0
+>  - CF: set to 1 iff unsigned overflow
+>    - Set to 1 iff dest<src
+>  - OF: set to 1 iff signed overflow
+>    - Set to 1 iff
 >      ```
 >      (dest>0 && src<0 && sum<0) ||
 >      (dest<0 && src>0 && sum>=0)
 >      ```
 >
 >  Example: cmpl src, dest
->  • Same as subl
->  • But does not affect dest 
+>  - Same as subl
+>  - But does not affect dest 
 
 given `ja` jumps if the flags `CF` & `ZF` are both set to 0, this means that we are doing 2 things:
 
