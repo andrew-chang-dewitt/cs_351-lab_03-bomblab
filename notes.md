@@ -45,10 +45,6 @@ remove `phase_1` breakpoint w/ `disable breakpoints <N>` (get breakpoint number 
 phase 2
 -------
 
-> [!TODO]:
-> - [x] read comments in phase 2 fn from bomb.asm
-> - [ ] write this section...
-
 examining the `objdump` output for `phase_2` shows a call to `read_six_numbers` after first making room for 7 4-byte ints on the stack.
 after stepping over the read six function, it can be observed that all six numbers from the input string were read into the stack, starting w/ `%rsp`.
 
@@ -235,7 +231,7 @@ assuming we survived so far, then we move our value @ 12 bytes above `%rsp` to `
   401177:	ff 24 c5 00 24 40 00 	jmpq   *0x402400(,%rax,8)
 ```
 
-breaking that hairy jump down, it's calculated in a few parts:
+breaking down that hairy jump statement, it's calculated in a few parts:
 
 1. `*0x402400`: a deref'd memory address
 2. `(,%rax,8)`: a calculation of values `(a,b,c)` that seems a little opaque so far
@@ -266,6 +262,118 @@ ending with a value of -380 for `%eax`. because the final comparison requires th
 ```
 5 -380
 ```
+
+phase 4
+-------
+
+examining the objdump, a few things are apparent before even beginning:
+
+```
+  I <- int[]   # `scanf` @ 0x401100
+  |I| === 2    # `cmp` & `jne` @ 0x401105 & 0x401108
+  i_0 >= 0     # `test` & `js` @ 0x40110e & 0x401110
+  i_0 < 14     # `cmp` & `jle` @ 0x401112 & 0x401115
+```
+
+after that, we set up a call to another function as follows:
+
+```
+∵ edi <- i_0 (13),
+  esi <- 0,
+  edx <- 14
+
+∴ func4(13, 0, 14)
+```
+
+phase 4 passes if result of `func4` call is 1 & `i_1` === 1
+
+### func4
+
+procedure appears to work as follows:
+
+```
+∵ edi, esi, edx <- ints (starting at i_0, 0, 14 but this changes w/ subsequent calls)
+  
+  eax <- edx = 14                   # 400e74:	89 d0     mov   %edx,%eax
+  ecx <- ecx >>l 31 = msb(eax) = 0  # 400e7a:	c1 e9 1f  shr   $0x1f,%ecx
+  eax <- rcx + rax = 0 + 14 (14)    # 400e7d:	8d 04 01  lea   (%rcx,%rax,1),%eax
+  eax <- eax >>a 1 = 14 / 2 = 7     # 400e80:	d1 f8     sar   %eax
+  ecx <- rax + rsi = 7 + 0 = 7      # 400e82:	8d 0c 30  lea   (%rax,%rsi,1),%ecx
+  
+  # 400e85:	39 f9 	cmp    %edi,%ecx
+  # 400e87:	7e 0c 	jle    400e95 <func4+0x25>
+  IF (edi (i_0) > ecx (7)):
+    # 400e89:	8d 51 ff       	lea    -0x1(%rcx),%edx
+    # 400e8c:	e8 df ff ff ff 	callq  400e70 <func4>
+    RETURN func4(edi (i_0), esi (0), edx - 1)
+
+  # ELSE: [0x400e95]
+  eax <- 0                          # 400e95:	b8 00 00 00 00	mov    $0x0,%eax
+  # 400e9a:	39 f9	cmp  %edi,%ecx
+  IF edi < 0:
+    # 400e9c:	7d 0c	jge  400eaa <func4+0x3a>
+    RETURN eax (0)
+
+  # ELSE: [0x400e9e]
+  RETURN func4(edi (i_0), esi++, edx)
+```
+
+a "stack trace", if you will:
+
+```
+> 11 1
+phase_4 "11 1"
+  func4 11 0 14
+    func4 11 8 14
+  1
+pass
+```
+
+phase 5
+-------
+
+also calls `scanf("%d %d")`, reading into $sp + 8 & $sp + 12
+then ensures `|I| > 1`
+
+continues w/ `eax <- $sp + 12 (i_0)`
+then enforces `eax != 0xf -> i_0 != 16`
+
+then:
+
+```
+ecx = edx <- 0
+esi <- 0x402440 (int* -> 10)
+edx++ (edx = 1, ecx = 0)
+```
+
+next sign extends eax to 64-bits (from 32)
+
+then `eax <- rsi + (rax * 4) = esi + 4*i_0`
+and  `ecx <- ecx + eax = 0 + esi + 4*i_0`
+
+next ensure `edx === 16`
+and  ensure `ecx === i_1`
+
+so it appears `i_0` needs to be something that gives an edx === 15 & ecx === `i_1`
+we'll track some guesses here to see if we can find a pattern:
+
+`i_0` | iters | %edx | %ecx
+----- | ----- | ---- | ----
+14    | 2 | 2 | 21
+16    | 6 | 6 | 48
+17    | 4 | 4 | 37
+18    | 3 | 3 | 35
+19    | 13 | 13 | 100
+20    | 8 | 8 | 56
+21    | 15 | 15 | 115
+
+this found the result: `21 115`
+
+phase 6
+-------
+
+
+
 
 references
 ==========

@@ -337,18 +337,31 @@ Disassembly of section .text:
   # but what if there's only 1 arg given?
   # looks like it shifts by 1: https://stackoverflow.com/a/12814154/4642869
   400e80:	d1 f8                	sar    %eax
+  # add rsi to rax & store result in ecx
   400e82:	8d 0c 30             	lea    (%rax,%rsi,1),%ecx
+  # if edi > ecx
   400e85:	39 f9                	cmp    %edi,%ecx
   400e87:	7e 0c                	jle    400e95 <func4+0x25>
+  ## edx := rcx - 1
   400e89:	8d 51 ff             	lea    -0x1(%rcx),%edx
+  ## "RETURN" recur
   400e8c:	e8 df ff ff ff       	callq  400e70 <func4>
+  #?? this looks UNREACHABLE? 
   400e91:	01 c0                	add    %eax,%eax
   400e93:	eb 15                	jmp    400eaa <func4+0x3a>
+  #?? end UNREACHABLE
+  ## otherwise if edi <= ecx
+  ## eax := 0
   400e95:	b8 00 00 00 00       	mov    $0x0,%eax
+  # if edi < 0
   400e9a:	39 f9                	cmp    %edi,%ecx
+  ## jump to RETURN
   400e9c:	7d 0c                	jge    400eaa <func4+0x3a>
+  ## esi++
   400e9e:	8d 71 01             	lea    0x1(%rcx),%esi
+  ## and recur
   400ea1:	e8 ca ff ff ff       	callq  400e70 <func4>
+  # RETURN (rax + rax)
   400ea6:	8d 44 00 01          	lea    0x1(%rax,%rax,1),%eax
   400eaa:	48 83 c4 08          	add    $0x8,%rsp
   400eae:	c3                   	retq   
@@ -512,8 +525,6 @@ Disassembly of section .text:
   401067:	83 c5 01             	add    $0x1,%ebp
   # i++
   40106a:	48 83 c3 04          	add    $0x4,%rbx
-  # if j is 6, end loop
-  40106e:	83 fd 06             	cmp    $0x6,%ebp
   # otherwise iterate again from 0x401059
   401071:	75 e6                	jne    401059 <phase_2+0x23>
   401073:	48 83 c4 28          	add    $0x28,%rsp
@@ -573,10 +584,10 @@ Disassembly of section .text:
   40110e:	85 c0                	test   %eax,%eax
   # which sets the sign flag to 1 if eax is negative
   # then we jump to explode if it was negative
+  401110:	78 05                	js     401117 <phase_4+0x2f>
   # so far we know...
   # |I| == 2
   # I[0] >= 0
-  401110:	78 05                	js     401117 <phase_4+0x2f>
   # now ensure I[0] < 14
   401112:	83 f8 0e             	cmp    $0xe,%eax
   # if not, boom
