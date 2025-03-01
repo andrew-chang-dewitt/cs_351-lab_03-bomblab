@@ -335,6 +335,7 @@ Disassembly of section .text:
   400e7d:	8d 04 01             	lea    (%rcx,%rax,1),%eax
   # sar -> shift right arithmetic by src
   # but what if there's only 1 arg given?
+  # looks like it shifts by 1: https://stackoverflow.com/a/12814154/4642869
   400e80:	d1 f8                	sar    %eax
   400e82:	8d 0c 30             	lea    (%rax,%rsi,1),%ecx
   400e85:	39 f9                	cmp    %edi,%ecx
